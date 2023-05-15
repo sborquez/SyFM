@@ -40,7 +40,7 @@ python transcription_pipeline.py --audio_path /path/to/audio  --engine whisper
 ```
 
 The output will be saved in the same directory as the audio file, with the same name
-as the audio file, but with a .txt extension.
+as the audio file, but with a .json extension.
 
 ### Output format
 
@@ -57,13 +57,12 @@ The output file will be formated as follows:
 
 ## TODO
 
-- [ ] Define Transcription Pipeline class
+- [x] Define Transcription Pipeline class
 - [ ] Implement with Whisper
 - [ ] Implement with Google Cloud Speech-to-Text API
 - [ ] Implement with OpenAI API
 - [ ] Add tests
 - [ ] Add support for other languages
-
 
 ## Authors
 
