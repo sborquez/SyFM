@@ -1,13 +1,14 @@
 from pathlib import Path
 from typing import Optional
 
-from transcription.pipeline import TranscriptionPipelineRegistry, TranscriptionOutput
+from transcription.pipeline import build_transcription_pipeline, TranscriptionOutput
 from transcription.engine import EngineRegistry
 
 
-def translation_pipeline(audio_path: Path, engine: str, output_dir: Optional[Path] = None) -> TranscriptionOutput:
-    engine = EngineRegistry.build_engine(engine)
-    pipeline = TranscriptionPipelineRegistry.build_transcription_pipeline('BasicTranscriptionPipeline', engine=engine)
+def translation_pipeline(audio_path: Path,
+                         engine_name: str,
+                         output_dir: Optional[Path] = None) -> TranscriptionOutput:
+    pipeline = build_transcription_pipeline(engine_name=engine_name)
     transcription = pipeline(audio_path, output_dir=output_dir)
     return transcription
 
@@ -16,7 +17,7 @@ if __name__ == '__main__':
     import argparse
     import logging
 
-    available_engines = EngineRegistry.list_available_engines()
+    available_engines = EngineRegistry.list_available()
 
     arg_parser = argparse.ArgumentParser(description='Transcribe audio files')
     arg_parser.add_argument('--audio_path', type=str, metavar='path_to_audio',

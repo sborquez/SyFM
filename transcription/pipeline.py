@@ -1,112 +1,44 @@
 from __future__ import annotations
-import abc
-import dataclasses
-import json
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Optional
 
-from transcription.engine import Engine
-
-
-@dataclasses.dataclass
-class TranscriptionOutput:
-    audio_path: Union[Path, str]
-    engine: str
-    language: str
-    transcription: str
-
-    def to_dict(self):
-        return dataclasses.asdict(self)
-
-    def to_json(self):
-        data = self.to_dict()
-        data['audio_path'] = str(data['audio_path'])
-        return json.dumps(data)
+from transcription.transcription import TranscriptionOutput
+from transcription.engine import Engine, EngineRegistry
+from transcription.audio_loader import AudioLoader, AudioLoaderRegistry
+from transcription.output_saver import OutputSaver, OutputSaverRegistry
 
 
-class TranscriptionPipelineRegistry:
+def build_transcription_pipeline(engine_name: str) -> TranscriptionPipeline:
+    """Build an engine from the registry
 
-    __pipelines : Dict[str, Engine] = {}
+    Args:
+        engine_name (str): Engine name
 
-    @staticmethod
-    def register(transcription_pipeline_class: Engine) -> None:
-        """This decorator registers an transcription pipeline in the registry.
+    Raises:
+        ValueError: If transcription pipeline is not registered
 
-        Args:
-            transcription_pipeline_class (TranscriptionPipeline): Transcription pipeline to register
-        """
-        name = transcription_pipeline_class.__name__
-        if name in TranscriptionPipelineRegistry.__pipelines:
-            raise ValueError(f'Transcription Pipelien {transcription_pipeline_class.__name__} already registered')
-        TranscriptionPipelineRegistry.__pipelines[name] = transcription_pipeline_class
-
-    @staticmethod
-    def list_available_transcription_pipelines() -> List[str]:
-        """Return a list of available transcription pipelines
-
-        Returns:
-            List[str]: List of available transcription pipelines
-        """
-        return list(TranscriptionPipelineRegistry.__pipelines.keys())
-
-    @staticmethod
-    def build_transcription_pipeline(transcription_pipeline_name: str, engine: Engine) -> TranscriptionPipeline:
-        """Build an engine from the registry
-
-        Args:
-            transcription_pipeline_name (str): Name of the transcription pipeline to build
-
-        Raises:
-            ValueError: If transcription pipeline is not registered
-
-        Returns:
-            TranscriptionPipeline: Transcription pipeline instance
-        """
-        if transcription_pipeline_name not in TranscriptionPipelineRegistry.__pipelines:
-            raise ValueError(f'Transcription Pipeline {transcription_pipeline_name} not registered')
-        return TranscriptionPipelineRegistry.__pipelines[transcription_pipeline_name](engine=engine)
+    Returns:
+        TranscriptionPipeline: Transcription pipeline instance
+    """
+    engine = EngineRegistry.build(engine_name)
+    audio_loader = AudioLoaderRegistry.build('BasicAudioLoader')
+    output_saver = OutputSaverRegistry.build('BasicOutputSaver')
+    pipeline = TranscriptionPipeline(
+        audio_loader=audio_loader,
+        engine=engine,
+        output_saver=output_saver,
+    )
+    return pipeline
 
 
-class TranscriptionPipeline(abc.ABC):
+class TranscriptionPipeline:
 
-    def __init__(self, engine: Engine) -> None:
+    def __init__(self, audio_loader: AudioLoader, engine: Engine, output_saver: OutputSaver) -> None:
         super().__init__()
+        self.audio_loader = audio_loader
         self.engine = engine
-
-    @abc.abstractmethod
-    def check_audio(self, audio_path: Path) -> bool:
-        """Check if audio file is valid.
-
-        Args:
-            audio_path (Path): Path to audio file
-
-        Returns:
-            bool: True if audio file is valid, False otherwise
-        """
-        ...
-
-    @abc.abstractmethod
-    def process(self, audio_path: Path) -> TranscriptionOutput:
-        """Process the audio file and return the transcription output
-
-        Args:
-            audio_path (Path): Path to audio file
-
-        Returns:
-            TranscriptionOutput: Transcription output
-        """
-        ...
-
-    @abc.abstractmethod
-    def save_output(self, transcription: TranscriptionOutput, output_dir: Optional[Path] = None) -> None:
-        """Save the output to a file. 
-
-        Args:
-            transcription (TranscriptionOutput): Transcription output
-            output_dir (Optional[Path], optional): Output directory. Defaults to None, which won't save it.
-        """
-        ...
+        self.output_saver = output_saver
 
     def __call__(self, audio_path: Path, output_dir: Optional[Path] = None) -> TranscriptionOutput:
         """Process the audio file and return the transcription output
@@ -129,9 +61,6 @@ class TranscriptionPipeline(abc.ABC):
         return output
 
 
-@TranscriptionPipelineRegistry.register
-class BasicTranscriptionPipeline(TranscriptionPipeline):
-
     def check_audio(self, audio_path: Path) -> bool:
         """Check if audio file is valid. This can include checking if the file exists, or if an url, etc.
 
@@ -142,11 +71,12 @@ class BasicTranscriptionPipeline(TranscriptionPipeline):
             bool: True if audio file is valid, False otherwise
         """
         logging.debug(f'Checking if audio file {audio_path} is valid')
-        if not audio_path.exists():
+        audio_path, is_valid = self.audio_loader.check(audio_path)
+        if not is_valid:
             logging.error(f'Audio file {audio_path} does not exist')
-            return False
+            return audio_path, is_valid
         logging.debug(f'Audio file {audio_path} is valid')
-        return True
+        return audio_path, is_valid
 
     def process(self, audio_path: Path) -> TranscriptionOutput:
         """Process the audio file and return the transcription output
@@ -177,7 +107,8 @@ class BasicTranscriptionPipeline(TranscriptionPipeline):
         if output_dir is None:
             logging.debug('No output directory specified, not saving output')
             return
-        output_dir.mkdir(parents=True, exist_ok=True)
-        output_path = output_dir / f'{transcription.audio_path.stem}.json'
-        with open(output_path, 'w') as f:
-            f.write(transcription.to_json())
+        self.output_saver.save(transcription, output_dir)
+        # output_dir.mkdir(parents=True, exist_ok=True)
+        # output_path = output_dir / f'{transcription.audio_path.stem}.json'
+        # with open(output_path, 'w') as f:
+        #     f.write(transcription.to_json())

@@ -58,10 +58,11 @@ The output file will be formated as follows:
 ## TODO
 
 - [x] Define Transcription Pipeline class
+- [ ] Add container
 - [ ] Implement with Whisper
+- [ ] Add tests
 - [ ] Implement with Google Cloud Speech-to-Text API
 - [ ] Implement with OpenAI API
-- [ ] Add tests
 - [ ] Add support for other languages
 
 ## Authors

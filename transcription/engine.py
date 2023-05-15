@@ -9,19 +9,19 @@ class EngineRegistry:
     __engines : Dict[str, Engine] = {}
 
     @staticmethod
-    def register(engine_class: Engine) -> None:
+    def register(class_: Engine) -> None:
         """This decorator registers an engine in the registry.
 
         Args:
             engine (Engine): Engine to register
         """
-        engine_name = engine_class.get_name()
+        engine_name = class_.get_name()
         if engine_name in EngineRegistry.__engines:
-            raise ValueError(f'Engine {engine_class.__name__} already registered')
-        EngineRegistry.__engines[engine_name] = engine_class
+            raise ValueError(f'Engine {class_.__name__} already registered')
+        EngineRegistry.__engines[engine_name] = class_
 
     @staticmethod
-    def list_available_engines() -> List[str]:
+    def list_available() -> List[str]:
         """Return a list of available transcription engines
 
         Returns:
@@ -30,7 +30,7 @@ class EngineRegistry:
         return list(EngineRegistry.__engines.keys())
 
     @staticmethod
-    def build_engine(engine_name: str) -> Engine:
+    def build(engine_name: str) -> Engine:
         """Build an engine from the registry
 
         Args:
