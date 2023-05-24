@@ -3,49 +3,7 @@ import abc
 from pathlib import Path
 from typing import Dict, List
 
-
-class EngineRegistry:
-
-    __engines : Dict[str, Engine] = {}
-
-    @staticmethod
-    def register(class_: Engine) -> None:
-        """This decorator registers an engine in the registry.
-
-        Args:
-            engine (Engine): Engine to register
-        """
-        engine_name = class_.get_name()
-        if engine_name in EngineRegistry.__engines:
-            raise ValueError(f'Engine {class_.__name__} already registered')
-        EngineRegistry.__engines[engine_name] = class_
-
-    @staticmethod
-    def list_available() -> List[str]:
-        """Return a list of available transcription engines
-
-        Returns:
-            List[str]: List of available transcription engines
-        """
-        return list(EngineRegistry.__engines.keys())
-
-    @staticmethod
-    def build(engine_name: str) -> Engine:
-        """Build an engine from the registry
-
-        Args:
-            engine_name (str): Name of the engine to build
-
-        Raises:
-            ValueError: If engine is not registered
-
-        Returns:
-            Engine: Engine instance
-        """
-        if engine_name not in EngineRegistry.__engines:
-            raise ValueError(f'Engine {engine_name} not registered')
-        return EngineRegistry.__engines[engine_name]()
-
+from tools.registry_pattern import Registry
 
 
 class Engine(abc.ABC):
@@ -85,6 +43,9 @@ class Engine(abc.ABC):
             str: Language code
         """
         ...
+
+
+EngineRegistry: Registry = Registry(Engine)
 
 
 @EngineRegistry.register
@@ -164,5 +125,5 @@ class WhisperEngine(Engine):
         Returns:
             str: Language code
         """
-        language = 'en',
+        language = 'en'
         return language

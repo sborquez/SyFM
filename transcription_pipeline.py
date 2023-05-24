@@ -16,8 +16,10 @@ def translation_pipeline(audio_path: Path,
 if __name__ == '__main__':
     import argparse
     import logging
+    from tools.logging import setup_logging
+    setup_logging()
 
-    available_engines = EngineRegistry.list_available()
+    available_engines = EngineRegistry.list_availables()
 
     arg_parser = argparse.ArgumentParser(description='Transcribe audio files')
     arg_parser.add_argument('--audio_path', type=str, metavar='path_to_audio',
@@ -31,9 +33,6 @@ if __name__ == '__main__':
     arg_parser.add_argument('--level', type=str, metavar='LEVEL', default='INFO',
                             help='Logging level')
     args = arg_parser.parse_args()
-
-    # Set logging level
-    logging.basicConfig(level=args.level, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     # Run pipeline
     logging.debug(f'Running transcription pipeline with engine {args.engine}')
