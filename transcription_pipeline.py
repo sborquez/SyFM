@@ -7,8 +7,9 @@ from transcription.engine import EngineRegistry
 
 def translation_pipeline(audio_path: Path,
                          engine_name: str,
+                         audio_language: Optional[str] = None,
                          output_dir: Optional[Path] = None) -> TranscriptionOutput:
-    pipeline = build_transcription_pipeline(engine_name=engine_name)
+    pipeline = build_transcription_pipeline(engine_name=engine_name, engine_build_arguments={'language': audio_language})
     transcription = pipeline(audio_path, output_dir=output_dir)
     return transcription
 
@@ -24,6 +25,8 @@ if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser(description='Transcribe audio files')
     arg_parser.add_argument('--audio_path', type=str, metavar='path_to_audio',
                             help='Path to audio file or directory of audio files')
+    arg_parser.add_argument('--audio_language', type=str, metavar='language_code',
+                            help='The language of the audio file(s)', default=None)
     arg_parser.add_argument('--engine', type=str, metavar='ENGINE',
                             help='Transcription engine to use',
                             choices=available_engines,
@@ -40,7 +43,7 @@ if __name__ == '__main__':
     audio_path = Path(args.audio_path)
     engine = args.engine
     output_dir = Path(args.output_dir) if args.output_dir else None
-    transcription = translation_pipeline(audio_path, engine, output_dir)
+    transcription = translation_pipeline(audio_path, engine, output_dir=output_dir, audio_language=args.audio_language)
     logging.debug(f'Transcription complete')
     print(transcription.to_dict())
 

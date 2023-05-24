@@ -68,7 +68,9 @@ The output file will be formated as follows:
   - [ ] Add tests
 - [ ] Transcription Pipeline
   - [x] Define Transcription Pipeline class
-  - [ ] Implement with Whisper
+  - [x] Implement with Whisper
+  - [x] Implement with Stable Whisper
+  - [ ] Add Croquis dataset generation output
   - [ ] Implement with Google Cloud Speech-to-Text API
   - [ ] Implement with OpenAI API
   - [ ] Add support for other languages
@@ -85,6 +87,7 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Built With
 
+- [pydub](https://github.com/jiaaro/pydub)
 - [Croquis](https://)
 - [OpenAI](https://openai.com/blog/openai-api/)
 - [Whisper](https://github.com/openai/whisper)

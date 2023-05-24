@@ -9,13 +9,22 @@ from transcription.audio_validator import AudioValidator, AudioValidatorRegistry
 from transcription.output_saver import OutputSaver, OutputSaverRegistry
 
 
-def build_transcription_pipeline(engine_name: str, audio_validator_name: str = 'BasicAudioValidator', output_saver_name: str = 'BasicOutputSaver') -> TranscriptionPipeline:
+def build_transcription_pipeline(engine_name: str,
+                                 engine_build_arguments: dict = {}, 
+                                 audio_validator_name: str = 'BasicAudioValidator',
+                                 audio_validator_arguments: dict = {}, 
+                                 output_saver_name: str = 'BasicOutputSaver',
+                                 output_saver_build_arguments: dict = {}, 
+                                 ) -> TranscriptionPipeline:
     """Build an engine from the registry
 
     Args:
         engine_name (str): Engine name
+        engine_build_arguments (dict, optional): Engine build arguments. Defaults to {}.
         audio_validator_name (str): Audio validator name
+        audio_validator_arguments (dict, optional): Audio validator build arguments. Defaults to {}.
         output_saver_name (str): Output saver name
+        output_saver_build_arguments (dict, optional): Output saver build arguments. Defaults to {}.
 
     Raises:
         ValueError: If transcription pipeline is not registered
@@ -23,9 +32,9 @@ def build_transcription_pipeline(engine_name: str, audio_validator_name: str = '
     Returns:
         TranscriptionPipeline: Transcription pipeline instance
     """
-    engine = EngineRegistry.build(engine_name)
-    audio_validator = AudioValidatorRegistry.build(audio_validator_name)
-    output_saver = OutputSaverRegistry.build(output_saver_name)
+    engine = EngineRegistry.build(engine_name, engine_build_arguments)
+    audio_validator = AudioValidatorRegistry.build(audio_validator_name, audio_validator_arguments)
+    output_saver = OutputSaverRegistry.build(output_saver_name, output_saver_build_arguments)
     pipeline = TranscriptionPipeline(
         audio_validator=audio_validator,
         engine=engine,
