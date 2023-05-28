@@ -10,11 +10,11 @@ from transcription.output_saver import OutputSaver, OutputSaverRegistry
 
 
 def build_transcription_pipeline(engine_name: str,
-                                 engine_build_arguments: dict = {}, 
+                                 engine_build_arguments: dict = {},
                                  audio_validator_name: str = 'BasicAudioValidator',
-                                 audio_validator_arguments: dict = {}, 
+                                 audio_validator_arguments: dict = {},
                                  output_saver_name: str = 'BasicOutputSaver',
-                                 output_saver_build_arguments: dict = {}, 
+                                 output_saver_build_arguments: dict = {},
                                  ) -> TranscriptionPipeline:
     """Build an engine from the registry
 
@@ -71,7 +71,6 @@ class TranscriptionPipeline:
         self.save_output(output, output_dir)
         return output
 
-
     def load_audio(self, audio_path: Path) -> bool:
         """Check if audio file is valid. This can include checking if the file exists, or if an url, etc.
 
@@ -103,12 +102,12 @@ class TranscriptionPipeline:
             audio_path=audio_path,
             engine=self.engine.get_name(),
             transcription=self.engine.transcribe(audio_path),
-            language=self.engine.language(audio_path) 
+            language=self.engine.language(audio_path)
         )
         return transcription
 
     def save_output(self, transcription: TranscriptionOutput, output_dir: Optional[Path] = None) -> None:
-        """Save the output to a file. 
+        """Save the output to a file.
 
         Args:
             transcription (TranscriptionOutput): Transcription output.

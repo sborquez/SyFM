@@ -5,3 +5,4 @@ torchaudio==0.13.1
 pydub==0.25.1
 openai-whisper
 stable-ts
+flake8

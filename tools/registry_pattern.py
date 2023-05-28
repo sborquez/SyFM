@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Type
 class Registry:
     """
     A factory register pattern
-    
+
     How to Use this Pattern
     =======================
 

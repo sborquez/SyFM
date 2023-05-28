@@ -30,3 +30,17 @@ class TranscriptionOutput:
         data = self.to_dict()
         data['audio_path'] = str(data['audio_path'])
         return json.dumps(data)
+
+    def from_json(self, json_filepath: Union[Path, str]):
+        data = json.load(json_filepath)
+        data['audio_path'] = Path(data['audio_path'])
+        data['transcription'] = [
+            TranscriptionSegment(**segment) for segment in data['transcription']
+        ]
+        # Validate keys, remove unused keys
+        transcription_data = {}
+        for key in dataclasses.asdict(self).keys():
+            if key not in data:
+                raise ValueError(f'Key {key} is missing from the transcription output')
+            transcription_data[key] = data[key]
+        return TranscriptionOutput(**data)
