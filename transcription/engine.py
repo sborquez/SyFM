@@ -137,6 +137,8 @@ class WhisperEngine(Engine):
         audio_path = str(audio_path)
         models_transcription = self._model.transcribe(audio_path, language=self._language)
         transcription, language = self._postprocess(models_transcription)
+        if self._language is None:
+            self._language = language
         return transcription
 
     def _postprocess(self, models_transcription: Any) -> Tuple[List[TranscriptionSegment], str]:
