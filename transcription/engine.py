@@ -1,5 +1,6 @@
 from __future__ import annotations
 import abc
+import logging
 from pathlib import Path
 from typing import Any, List, Optional, Tuple
 
@@ -7,7 +8,11 @@ import whisper
 import stable_whisper
 
 from tools.registry_pattern import Registry
+from tools.logging import setup_logging
 from transcription.transcription import TranscriptionSegment
+
+
+setup_logging()
 
 
 class Engine(abc.ABC):
@@ -15,6 +20,10 @@ class Engine(abc.ABC):
     """
 
     name = 'base'
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__()
+        logging.debug(f'Initializing {self.get_name()} engine')
 
     @classmethod
     def get_name(cls) -> str:
@@ -100,7 +109,8 @@ class WhisperEngine(Engine):
 
     name = 'whisper'
 
-    def __init__(self, model: str = 'medium', language: Optional[str] = None) -> None:
+    def __init__(self, model: str = 'medium', language: Optional[str] = None, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
         self._model = self._load_model(model)
         self._language = language
 
@@ -152,7 +162,6 @@ class WhisperEngine(Engine):
             self._language = models_transcription['language']
         language = self._language
         return transcription, language
-
 
     def language(self, audio_path: Path) -> str:
         """Detect the language of an audio file

@@ -44,6 +44,5 @@ if __name__ == '__main__':
     engine = args.engine
     output_dir = Path(args.output_dir) if args.output_dir else None
     transcription = translation_pipeline(audio_path, engine, output_dir=output_dir, audio_language=args.audio_language)
-    logging.debug(f'Transcription complete')
+    logging.debug('Transcription complete')
     print(transcription.to_dict())
-

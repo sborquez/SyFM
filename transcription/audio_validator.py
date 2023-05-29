@@ -1,14 +1,23 @@
 from __future__ import annotations
 import abc
+import logging
 from pathlib import Path
-from typing import Tuple
+from typing import Any, Tuple
 
 from tools.registry_pattern import Registry
+from tools.logging import setup_logging
+
+
+setup_logging()
 
 
 class AudioValidator(abc.ABC):
     """Check if the audio loader can load the given audio file
     """
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__()
+        logging.debug(f'Initializing {type(self)} audio validator')
 
     @abc.abstractmethod
     def check(self, audio_path: Path) -> Tuple[Path, bool]:
