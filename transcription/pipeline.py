@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple, Union, Any
 
 from transcription.transcription import TranscriptionOutput
 from transcription.engine import Engine, EngineRegistry
@@ -9,11 +9,11 @@ from transcription.audio_validator import AudioValidator, AudioValidatorRegistry
 from transcription.output_saver import OutputSaver, OutputSaverRegistry
 
 
-def build_transcription_pipeline(engine_name: str,
+def build_transcription_pipeline(engine_name: str = 'StableWhisperEngine',
                                  engine_build_arguments: dict = {},
                                  audio_validator_name: str = 'BasicAudioValidator',
                                  audio_validator_arguments: dict = {},
-                                 output_saver_name: str = 'BasicOutputSaver',
+                                 output_saver_name: str = 'CroquisOutputSaver',
                                  output_saver_build_arguments: dict = {},
                                  ) -> TranscriptionPipeline:
     """Build an engine from the registry
@@ -64,21 +64,21 @@ class TranscriptionPipeline:
         Returns:
             TranscriptionOutput: Transcription output
         """
-        is_valid = self.load_audio(audio_path)
+        audio_path, is_valid = self.load_audio(audio_path)
         if not is_valid:
             raise ValueError(f'Invalid audio file {audio_path}')
         output = self.process(audio_path)
         self.save_output(output, output_dir)
         return output
 
-    def load_audio(self, audio_path: Path) -> bool:
+    def load_audio(self, audio_path: Path) -> Tuple[Union[str, Path], bool]:
         """Check if audio file is valid. This can include checking if the file exists, or if an url, etc.
 
         Args:
             audio_path (Path): Path to audio file
 
         Returns:
-            bool: True if audio file is valid, False otherwise
+            Tuple[Union[str, Path], bool]: Tuple of audio path and whether it is valid
         """
         logging.debug(f'Checking if audio file {audio_path} is valid')
         audio_path, is_valid = self.audio_validator.check(audio_path)

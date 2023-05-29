@@ -30,17 +30,17 @@ To run the container with a volume and GPU, run:
 docker run -it --gpus all -v /path/to/audio:/audio syfm:latest transcription-pipeline
 ```
 
-## Transcription Pipeline
+## Generate a Transcription Dataset
 
-This pipeline is for the voice transcription task. It define the Transcription Pipeline
-class, to transcribe the audio file into text. It can also be used to generate a Croquis dataset.
+This transcription pipeline is for the voice transcription task. It define the Transcription Pipeline
+class, to transcribe the audio file into text, and generate a Croquis dataset for training a new AI voice.
 
 ### Usage
 
 To use the Transcription Pipeline, you can run the following command:
 
 ```bash
-python transcription_pipeline.py --audio_path /path/to/audio  --engine whisper
+python -m scripts.generate_transcription_dataset --audio_path /path/to/audio --engine_name StableWhisperEngine --output_dir path/to/output --model medium --language es --dataset_name voice_name
 ```
 
 The output will be saved in the same directory as the audio file, with the same name
@@ -48,7 +48,39 @@ as the audio file, but with a .json extension.
 
 ### Output format
 
-The output file will be formated as follows:
+The default output format is the Croquis Dataset format. Described in the next section.
+
+#### CroquisOutputSaver
+
+The Croquis output dataset is the default output format. It will write a output file will be formated as follows:
+
+```json
+# metadata.txt
+
+audio1|This is my sentence.
+audio2|This is maybe my sentence.
+audio3|This is certainly my sentence.
+audio4|Let this be your sentence.
+...
+```
+
+with the audio files and transcription files in the same directory. As the following:
+
+```bash
+/Output/Dir/DatasetName
+      |
+      | -> metadata.txt
+      | -> /wavs
+              | -> audio1.wav
+              | -> audio2.wav
+              | ...
+```
+
+For more information about the Croquis Dataset format, please refer to the [Croquis](https://tts.readthedocs.io/en/latest/formatting_your_dataset.htmlf) repository.
+
+#### BasicOutputSaver
+
+The BasicOutputSaver will write a output file will be formated as follows:
 
 ```json
 [
@@ -56,7 +88,13 @@ The output file will be formated as follows:
         "audio_path": "/path/to/audio",
         "engine": "whisper",
         "language": "en",
-        "transcription": "This is the transcription of the audio file"
+        "transcription": [
+          {
+            "start_ms": 0,
+            "end_ms": 2000,
+            "text": "This is the transcription of the audio file"
+          }
+        ]
     }
 ]
 ```
@@ -66,15 +104,14 @@ The output file will be formated as follows:
 - [ ] General
   - [ ] Add container
   - [ ] Add tests
-- [ ] Transcription Pipeline
+- [x] Transcription Pipeline
   - [x] Define Transcription Pipeline class
   - [x] Implement with Whisper
   - [x] Implement with Stable Whisper
-  - [ ] Add Croquis dataset generation output
-  - [ ] Implement with Google Cloud Speech-to-Text API
-  - [ ] Implement with OpenAI API
-  - [ ] Add support for other languages
-- [ ] Synthetizer Pipeline
+  - [x] Add Croquis dataset generation output
+- [ ] Trainer
+  - [ ] TBA
+- [ ] Synthetizer
   - [ ] TBA
 
 ## Authors

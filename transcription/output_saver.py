@@ -94,8 +94,8 @@ class CroquisOutputSaver(OutputSaver):
     # Crop template, fill with 5 digits
     CROP_TEMPLATE = '{audio_source}_{crop_id:05d}'
 
-    def __init__(self, dataset_name: str, mode: Union[Mode, str] = Mode.APPEND,
-                 strategy: Union[Strategy, str] = Strategy.NOTHING, **kwargs: Any) -> None:
+    def __init__(self, dataset_name: Optional[str] = None, mode: Union[Mode, str] = Mode.APPEND,
+                 strategy: Union[Strategy, str] = Strategy.THRESHOLD, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         # Dataset speaker name
         self.dataset_name = dataset_name
@@ -242,7 +242,7 @@ class CroquisOutputSaver(OutputSaver):
         output_dir.mkdir(parents=True, exist_ok=True)
 
         # Check if dataset folder exists, if not create it
-        dataset_dir = output_dir / self.dataset_name
+        dataset_dir = output_dir / self.dataset_name if self.dataset_name else output_dir
         # if exists, and mode is WRITE, delete the folder and create it
         if self.mode == self.Mode.WRITE and dataset_dir.exists():
             logging.warning(f'Deleting dataset folder: {dataset_dir}')
@@ -251,12 +251,6 @@ class CroquisOutputSaver(OutputSaver):
         # if exists, and mode is APPEND, do nothing
         logging.debug(f'Creating dataset folder: {dataset_dir}')
         dataset_dir.mkdir(parents=True, exist_ok=True)
-
-        # Copy the audio file to the dataset folder if it doesn't exist
-        audio_path = dataset_dir / transcription.audio_path.name
-        if not audio_path.exists():
-            logging.debug(f'Copying audio file to dataset folder: {audio_path}')
-            transcription.audio_path.rename(audio_path)
 
         # Format the transcription to a Croquis dataset format
         audios_crops = self._to_croquis_format(transcription)
